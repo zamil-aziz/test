@@ -1,5 +1,6 @@
 import type { MetaFunction } from "@remix-run/node";
 import { Form } from "@remix-run/react";
+import AgGrid from "~/components/AgGrid";
 
 export const meta: MetaFunction = () => {
   return [
@@ -11,17 +12,7 @@ export const meta: MetaFunction = () => {
 export default function Index() {
   return (
    <div>
-    <div>
-      <h1>Login</h1>
-      <Form method="post">
-        <div>
-          <label htmlFor="name">
-            Name
-          </label>
-          <input type="text" name="name" id="name"/>
-        </div>
-      </Form>
-    </div>
+    <AgGrid/>
    </div>
   );
 }
