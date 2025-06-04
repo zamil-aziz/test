@@ -1,50 +1,3 @@
-/*
-=== AG GRID COMMUNITY FEATURES DEMO ===
-
-🔍 FILTERING & SEARCH:
-- Quick Filter: Search across all columns simultaneously
-- Column Filters: Individual filters per column (text, number)
-- Floating Filters: Filter inputs shown below headers
-
-📊 SORTING:
-- Multi-Column Sort: Hold Ctrl + click headers
-- Single Column Sort: Click headers
-
-✏️ EDITING & SELECTION:
-- Cell Editing: Double-click cells to edit
-- Row Selection: Multi-select with checkboxes
-- Copy/Paste: Standard Ctrl+C/Ctrl+V support
-
-🎨 DISPLAY & STYLING:
-- Custom Renderers: Buttons, progress bars, status badges
-- Column Pinning: Lock columns to left/right
-- Themes: Professional styling with themeQuartz
-- Tooltips: Hover information on cells
-
-📄 PAGINATION & NAVIGATION:
-- Pagination: Navigate large datasets efficiently
-- Page Size Options: 10, 25, 50, 100 rows per page
-- Virtual Scrolling: Handle thousands of rows smoothly
-
-⚙️ COLUMN MANAGEMENT:
-- Resizing: Drag column borders to resize
-- Reordering: Drag column headers to reorder
-- Show/Hide: Toggle column visibility
-- Auto-sizing: Fit columns to content or container
-
-🚀 TRY THESE FEATURES:
-- Filtering: Use the search box or click filter icons in headers
-- Sorting: Click column headers, hold Ctrl for multi-sort
-- Selection: Check boxes to select rows, see count update
-- Editing: Double-click the Model column cells to edit
-- Actions: Use Edit/Delete buttons in the Actions column
-- Resizing: Drag column borders to resize columns
-- Pagination: Navigate pages at the bottom of the grid
-
-NOTE: Advanced features like row grouping, set filters, range selection,
-and aggregation require AG Grid Enterprise license.
-*/
-
 import { AgGridReact } from "ag-grid-react";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
@@ -53,23 +6,23 @@ import { themeQuartz } from 'ag-grid-community';
 // Register modules once
 ModuleRegistry.registerModules([AllCommunityModule]);
 
-// Custom Cell Renderers
+// Custom Cell Renderers with fixed alignment
 const ActionCellRenderer = (props) => {
     const buttonClicked = () => {
         alert(`Action clicked for ${props.data.make} ${props.data.model}`);
     };
 
     return (
-        <div className="flex items-center justify-center h-full gap-2">
+        <div className="flex items-center justify-center h-full w-full gap-2" style={{ height: '100%', minHeight: '60px' }}>
             <button
                 onClick={buttonClicked}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs transition-colors"
+                className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs transition-colors whitespace-nowrap"
             >
                 Edit
             </button>
             <button
                 onClick={() => alert(`Delete ${props.data.make}`)}
-                className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs transition-colors"
+                className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs transition-colors whitespace-nowrap"
             >
                 Delete
             </button>
@@ -80,8 +33,8 @@ const ActionCellRenderer = (props) => {
 const StatusCellRenderer = (props) => {
     const isElectric = props.value;
     return (
-        <div className="flex items-center h-full">
-            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+        <div className="flex items-center justify-center h-full w-full" style={{ height: '100%', minHeight: '60px' }}>
+            <span className={`px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
                 isElectric
                     ? 'bg-green-100 text-green-800'
                     : 'bg-red-100 text-red-800'
@@ -95,14 +48,14 @@ const StatusCellRenderer = (props) => {
 const ProgressCellRenderer = (props) => {
     const percentage = Math.min(100, Math.max(0, (props.value / 100000) * 100));
     return (
-        <div className="flex items-center h-full w-full">
-            <div className="w-full bg-gray-200 rounded-full h-2">
+        <div className="flex items-center h-full w-full px-2" style={{ height: '100%', minHeight: '60px' }}>
+            <div className="w-full bg-gray-200 rounded-full h-2 flex-grow">
                 <div
                     className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                     style={{width: `${percentage}%`}}
                 ></div>
             </div>
-            <span className="ml-2 text-xs text-gray-600">{percentage.toFixed(0)}%</span>
+            <span className="ml-2 text-xs text-gray-600 whitespace-nowrap">{percentage.toFixed(0)}%</span>
         </div>
     );
 };
@@ -110,7 +63,7 @@ const ProgressCellRenderer = (props) => {
 const AgGrid = () => {
     // State Management
     const [rowData, setRowData] = useState([
-        { id: 1, make: "Tesla", model: "Model Y", price: 64950, electric: true, year: 2023, category: "SUV", rating: 4.8, inStock: true },
+        { id: 1, make: "Tesla", model: "Model Y", price: 64950, electric: true, year: 2023, category: "SUV", rating: 2, inStock: true },
         { id: 2, make: "Ford", model: "F-Series", price: 33850, electric: false, year: 2023, category: "Truck", rating: 4.2, inStock: true },
         { id: 3, make: "Toyota", model: "Corolla", price: 29600, electric: false, year: 2023, category: "Sedan", rating: 4.5, inStock: false },
         { id: 4, make: "BMW", model: "X5", price: 75900, electric: false, year: 2024, category: "SUV", rating: 4.7, inStock: true },
@@ -123,32 +76,29 @@ const AgGrid = () => {
     const [quickFilterText, setQuickFilterText] = useState('');
     const [selectedRows, setSelectedRows] = useState([]);
 
-    // Column Definitions with only community features
+    // Column Definitions with proper cell styling
     const columnDefs = useMemo(() => [
         {
             // ROW SELECTION: Checkbox column for multi-select
             checkboxSelection: true,
             headerCheckboxSelection: true,
-            width: 50,
+            width:50,
             pinned: 'left',
             lockPosition: true,
             suppressMenu: true,
-            headerName: "Select"
+            // headerName: "Select",
+            // cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center' }
         },
         {
             field: "make",
             headerName: "Manufacturer",
-            // SORTING: Enable sorting
             sortable: true,
-            // FILTERING: Enable column filter
             filter: 'agTextColumnFilter',
-            // PINNING: Pin important columns
             pinned: 'left',
             width: 150,
-            // CELL STYLING: Custom cell class
             cellClass: 'font-semibold',
-            // TOOLTIPS: Show tooltips on hover
-            tooltipField: 'make'
+            tooltipField: 'make',
+            cellStyle: { display: 'flex', alignItems: 'center' }
         },
         {
             field: "model",
@@ -156,9 +106,9 @@ const AgGrid = () => {
             sortable: true,
             filter: 'agTextColumnFilter',
             flex: 1,
-            // EDITING: Enable cell editing
             editable: true,
-            cellEditor: 'agTextCellEditor'
+            cellEditor: 'agTextCellEditor',
+            cellStyle: { display: 'flex', alignItems: 'center' }
         },
         {
             field: "category",
@@ -166,30 +116,28 @@ const AgGrid = () => {
             sortable: true,
             filter: 'agTextColumnFilter',
             width: 120,
-            // VALUE GETTER: Computed values
             valueGetter: (params) => params.data.category,
-            cellStyle: { fontWeight: 'bold', color: '#2563eb' }
+            cellStyle: { fontWeight: 'bold', color: '#2563eb', display: 'flex', alignItems: 'center' }
         },
         {
             field: "year",
             headerName: "Year",
             sortable: true,
-            // NUMBER FILTER: Numeric filtering
             filter: 'agNumberColumnFilter',
             width: 100,
-            cellClass: 'text-center'
+            cellClass: 'text-center',
+            cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center' }
         },
         {
             field: "price",
             headerName: "Price (RM)",
             sortable: true,
             filter: 'agNumberColumnFilter',
-            // VALUE FORMATTER: Format currency
             valueFormatter: (params) => `RM ${params.value?.toLocaleString() || 0}`,
             cellClass: 'number-cell font-mono',
             headerClass: 'number-header',
             width: 140,
-            cellStyle: { textAlign: 'right', fontWeight: '600' }
+            cellStyle: { textAlign: 'right', fontWeight: '600', display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }
         },
         {
             field: "price",
@@ -198,21 +146,27 @@ const AgGrid = () => {
             width: 200,
             sortable: false,
             filter: false,
-            suppressMenu: true
+            suppressMenu: true,
+            cellStyle: { padding: 0 },
+            colId: "priceProgress" // Add unique column ID
         },
         {
             field: "rating",
             headerName: "Rating",
             sortable: true,
             filter: 'agNumberColumnFilter',
-            width: 100,
-            cellClass: 'text-center',
-            // CELL RENDERER: Custom star rating display
+            width: 120,
             cellRenderer: (params) => {
                 const rating = params.value || 0;
                 const stars = '⭐'.repeat(Math.floor(rating));
-                return `<span class="text-yellow-500">${stars}</span> ${rating}`;
-            }
+                return (
+                    <div className="flex items-center justify-center h-full w-full" style={{ height: '100%', minHeight: '60px' }}>
+                        <span className="text-yellow-500 mr-1">{stars}</span>
+                        <span className="text-sm font-medium">{rating}</span>
+                    </div>
+                );
+            },
+            cellStyle: { padding: 0 }
         },
         {
             field: "electric",
@@ -220,7 +174,8 @@ const AgGrid = () => {
             sortable: true,
             filter: 'agTextColumnFilter',
             width: 130,
-            cellRenderer: StatusCellRenderer
+            cellRenderer: StatusCellRenderer,
+            cellStyle: { padding: 0 } // Remove default padding for custom renderer
         },
         {
             field: "inStock",
@@ -229,10 +184,15 @@ const AgGrid = () => {
             filter: 'agTextColumnFilter',
             width: 100,
             cellRenderer: (params) => (
-                params.value
-                    ? '<span class="text-green-600 font-semibold">✓ Yes</span>'
-                    : '<span class="text-red-600 font-semibold">✗ No</span>'
-            )
+                <div className="flex items-center justify-center h-full w-full" style={{ height: '100%', minHeight: '60px' }}>
+                    {params.value ? (
+                        <span className="text-green-600 font-semibold">✓ Yes</span>
+                    ) : (
+                        <span className="text-red-600 font-semibold">✗ No</span>
+                    )}
+                </div>
+            ),
+            cellStyle: { padding: 0 }
         },
         {
             field: "actions",
@@ -242,40 +202,26 @@ const AgGrid = () => {
             sortable: false,
             filter: false,
             pinned: 'right',
-            suppressMenu: true
+            suppressMenu: true,
+            cellStyle: { padding: 0 } // Remove default padding for custom renderer
         }
     ], []);
 
-    // Grid Options with only community features
+    // Grid Options with proper styling
     const gridOptions = useMemo(() => ({
-        // SELECTION
         rowSelection: 'multiple',
         suppressRowClickSelection: true,
-
-        // PAGINATION
         pagination: true,
         paginationPageSize: 10,
         paginationPageSizeSelector: [10, 25, 50, 100],
-
-        // SORTING
         multiSortKey: 'ctrl',
-
-        // FILTERING
         enableFilter: true,
         floatingFilter: true,
-
-        // COLUMN FEATURES
         enableColResize: true,
         resizeColumnsToFit: true,
         suppressColumnVirtualisation: true,
-
-        // ROW FEATURES
         enableCellTextSelection: true,
-
-        // PERFORMANCE
         animateRows: true,
-
-        // STYLING
         headerHeight: 50,
         rowHeight: 60,
     }), []);
@@ -289,7 +235,6 @@ const AgGrid = () => {
     }, []);
 
     const onGridReady = useCallback((params) => {
-        // Auto-size columns to fit
         params.api.sizeColumnsToFit();
     }, []);
 
@@ -316,13 +261,50 @@ const AgGrid = () => {
 
     return (
         <div className="w-full h-screen bg-gray-50 p-6">
+            {/* Custom CSS to ensure proper alignment */}
+            <style jsx>{`
+                .ag-cell {
+                    display: flex !important;
+                    align-items: center !important;
+                }
+
+                .ag-cell-wrapper {
+                    height: 100% !important;
+                    display: flex !important;
+                    align-items: center !important;
+                }
+
+                .ag-selection-checkbox {
+                    align-self: center !important;
+                }
+
+                /* Fix for custom renderers */
+                .ag-cell[data-colid="priceProgress"],
+                .ag-cell[data-colid="electric"],
+                .ag-cell[data-colid="actions"],
+                .ag-cell[data-colid="rating"],
+                .ag-cell[data-colid="inStock"] {
+                    padding: 0 !important;
+                }
+
+                /* Prevent text overflow */
+                .ag-cell {
+                    overflow: hidden !important;
+                }
+
+                /* Ensure custom renderers take full height */
+                .ag-cell .flex {
+                    height: 100% !important;
+                }
+            `}</style>
+
             {/* Header Section */}
             <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
                 <h1 className="text-3xl font-bold text-gray-800 mb-2">
-                    🚗 AG Grid Community Features Demo (Fixed)
+                    🚗 AG Grid Community Features Demo (Alignment Fixed)
                 </h1>
                 <p className="text-gray-600 mb-4">
-                    Comprehensive showcase of AG Grid Community features - Enterprise features removed
+                    Fixed vertical alignment issues in custom cell renderers
                 </p>
 
                 {/* Control Panel */}
@@ -385,7 +367,6 @@ const AgGrid = () => {
                         onCellValueChanged={onCellValueChanged}
                         quickFilterText={quickFilterText}
                         theme={themeQuartz}
-                        // Additional props for community features
                         defaultColDef={{
                             sortable: true,
                             filter: true,
