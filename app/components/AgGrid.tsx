@@ -46,21 +46,33 @@ const StatusCellRenderer = (props) => {
 };
 
 const ProgressCellRenderer = (props) => {
-    const percentage = Math.min(100, Math.max(0, (props.value / 100000) * 100));
+    console.log('ProgressCellRenderer props:', props); // Debug log
+
+    // Get the price value from the data
+    const priceValue = props.data?.price || 0;
+
+    // Calculate percentage based on price (max 150,000 for better scaling)
+    const percentage = Math.min(100, Math.max(0, (priceValue / 150000) * 100));
+
     return (
         <div className="flex items-center h-full w-full px-2" style={{ height: '100%', minHeight: '60px' }}>
-            <div className="w-full bg-gray-200 rounded-full h-2 flex-grow">
+            <div className="w-full bg-gray-200 rounded-full h-3 flex-grow mr-2">
                 <div
-                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                    className="bg-blue-600 h-3 rounded-full transition-all duration-300"
                     style={{width: `${percentage}%`}}
                 ></div>
             </div>
-            <span className="ml-2 text-xs text-gray-600 whitespace-nowrap">{percentage.toFixed(0)}%</span>
+            <span className="text-xs text-gray-600 whitespace-nowrap min-w-[35px]">
+                {percentage.toFixed(0)}%
+            </span>
         </div>
     );
 };
 
 const AgGrid = () => {
+    // State for hydration
+    const [mounted, setMounted] = useState(false);
+
     // State Management
     const [rowData, setRowData] = useState([
         { id: 1, make: "Tesla", model: "Model Y", price: 64950, electric: true, year: 2023, category: "SUV", rating: 2, inStock: true },
@@ -76,18 +88,21 @@ const AgGrid = () => {
     const [quickFilterText, setQuickFilterText] = useState('');
     const [selectedRows, setSelectedRows] = useState([]);
 
+    // Handle hydration
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
     // Column Definitions with proper cell styling
     const columnDefs = useMemo(() => [
         {
             // ROW SELECTION: Checkbox column for multi-select
             checkboxSelection: true,
             headerCheckboxSelection: true,
-            width:50,
+            width: 50,
             pinned: 'left',
             lockPosition: true,
             suppressMenu: true,
-            // headerName: "Select",
-            // cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center' }
         },
         {
             field: "make",
@@ -96,9 +111,8 @@ const AgGrid = () => {
             filter: 'agTextColumnFilter',
             pinned: 'left',
             width: 150,
-            cellClass: 'font-semibold',
+            cellClass: 'font-semibold ag-cell-center',
             tooltipField: 'make',
-            cellStyle: { display: 'flex', alignItems: 'center' }
         },
         {
             field: "model",
@@ -108,7 +122,7 @@ const AgGrid = () => {
             flex: 1,
             editable: true,
             cellEditor: 'agTextCellEditor',
-            cellStyle: { display: 'flex', alignItems: 'center' }
+            cellClass: 'ag-cell-center'
         },
         {
             field: "category",
@@ -117,7 +131,7 @@ const AgGrid = () => {
             filter: 'agTextColumnFilter',
             width: 120,
             valueGetter: (params) => params.data.category,
-            cellStyle: { fontWeight: 'bold', color: '#2563eb', display: 'flex', alignItems: 'center' }
+            cellClass: 'ag-cell-center category-cell'
         },
         {
             field: "year",
@@ -125,8 +139,7 @@ const AgGrid = () => {
             sortable: true,
             filter: 'agNumberColumnFilter',
             width: 100,
-            cellClass: 'text-center',
-            cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center' }
+            cellClass: 'text-center ag-cell-center',
         },
         {
             field: "price",
@@ -134,21 +147,22 @@ const AgGrid = () => {
             sortable: true,
             filter: 'agNumberColumnFilter',
             valueFormatter: (params) => `RM ${params.value?.toLocaleString() || 0}`,
-            cellClass: 'number-cell font-mono',
+            cellClass: 'number-cell font-mono ag-cell-right',
             headerClass: 'number-header',
             width: 140,
-            cellStyle: { textAlign: 'right', fontWeight: '600', display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }
         },
         {
-            field: "price",
+            // FIXED: Use a different field mapping for the progress bar
             headerName: "Price Progress",
             cellRenderer: ProgressCellRenderer,
             width: 200,
             sortable: false,
             filter: false,
             suppressMenu: true,
-            cellStyle: { padding: 0 },
-            colId: "priceProgress" // Add unique column ID
+            cellClass: 'ag-cell-no-padding',
+            colId: "priceProgress", // Unique column ID
+            // Don't specify a field, let the renderer access the data directly
+            valueGetter: (params) => params.data?.price || 0 // This helps the renderer get the value
         },
         {
             field: "rating",
@@ -166,7 +180,7 @@ const AgGrid = () => {
                     </div>
                 );
             },
-            cellStyle: { padding: 0 }
+            cellClass: 'ag-cell-no-padding'
         },
         {
             field: "electric",
@@ -175,7 +189,7 @@ const AgGrid = () => {
             filter: 'agTextColumnFilter',
             width: 130,
             cellRenderer: StatusCellRenderer,
-            cellStyle: { padding: 0 } // Remove default padding for custom renderer
+            cellClass: 'ag-cell-no-padding'
         },
         {
             field: "inStock",
@@ -192,7 +206,7 @@ const AgGrid = () => {
                     )}
                 </div>
             ),
-            cellStyle: { padding: 0 }
+            cellClass: 'ag-cell-no-padding'
         },
         {
             field: "actions",
@@ -203,7 +217,7 @@ const AgGrid = () => {
             filter: false,
             pinned: 'right',
             suppressMenu: true,
-            cellStyle: { padding: 0 } // Remove default padding for custom renderer
+            cellClass: 'ag-cell-no-padding'
         }
     ], []);
 
@@ -259,52 +273,74 @@ const AgGrid = () => {
         alert('Row Grouping - requires Enterprise license (RowGroupingModule)');
     };
 
+    // Don't render until mounted to prevent hydration mismatch
+    if (!mounted) {
+        return (
+            <div className="w-full h-screen bg-gray-50 p-6 flex items-center justify-center">
+                <div className="text-gray-600">Loading...</div>
+            </div>
+        );
+    }
+
     return (
         <div className="w-full h-screen bg-gray-50 p-6">
-            {/* Custom CSS to ensure proper alignment */}
-            <style jsx>{`
-                .ag-cell {
-                    display: flex !important;
-                    align-items: center !important;
-                }
+            {/* Global CSS styles - moved to external stylesheet or CSS modules recommended */}
+            <style dangerouslySetInnerHTML={{
+                __html: `
+                    .ag-cell {
+                        display: flex !important;
+                        align-items: center !important;
+                    }
 
-                .ag-cell-wrapper {
-                    height: 100% !important;
-                    display: flex !important;
-                    align-items: center !important;
-                }
+                    .ag-cell-wrapper {
+                        height: 100% !important;
+                        display: flex !important;
+                        align-items: center !important;
+                    }
 
-                .ag-selection-checkbox {
-                    align-self: center !important;
-                }
+                    .ag-selection-checkbox {
+                        align-self: center !important;
+                    }
 
-                /* Fix for custom renderers */
-                .ag-cell[data-colid="priceProgress"],
-                .ag-cell[data-colid="electric"],
-                .ag-cell[data-colid="actions"],
-                .ag-cell[data-colid="rating"],
-                .ag-cell[data-colid="inStock"] {
-                    padding: 0 !important;
-                }
+                    .ag-cell-center {
+                        display: flex !important;
+                        align-items: center !important;
+                    }
 
-                /* Prevent text overflow */
-                .ag-cell {
-                    overflow: hidden !important;
-                }
+                    .ag-cell-right {
+                        display: flex !important;
+                        align-items: center !important;
+                        justify-content: flex-end !important;
+                        text-align: right !important;
+                        font-weight: 600 !important;
+                    }
 
-                /* Ensure custom renderers take full height */
-                .ag-cell .flex {
-                    height: 100% !important;
-                }
-            `}</style>
+                    .ag-cell-no-padding {
+                        padding: 0 !important;
+                    }
+
+                    .category-cell {
+                        font-weight: bold !important;
+                        color: #2563eb !important;
+                    }
+
+                    .ag-cell {
+                        overflow: hidden !important;
+                    }
+
+                    .ag-cell .flex {
+                        height: 100% !important;
+                    }
+                `
+            }} />
 
             {/* Header Section */}
             <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
                 <h1 className="text-3xl font-bold text-gray-800 mb-2">
-                    🚗 AG Grid Community Features Demo (Alignment Fixed)
+                    🚗 AG Grid Community Features Demo (Hydration Fixed)
                 </h1>
                 <p className="text-gray-600 mb-4">
-                    Fixed vertical alignment issues in custom cell renderers
+                    Fixed SSR hydration mismatch issue and progress bar rendering
                 </p>
 
                 {/* Control Panel */}
