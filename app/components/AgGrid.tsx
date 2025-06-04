@@ -1,3 +1,50 @@
+/*
+=== AG GRID COMMUNITY FEATURES DEMO ===
+
+🔍 FILTERING & SEARCH:
+- Quick Filter: Search across all columns simultaneously
+- Column Filters: Individual filters per column (text, number)
+- Floating Filters: Filter inputs shown below headers
+
+📊 SORTING:
+- Multi-Column Sort: Hold Ctrl + click headers
+- Single Column Sort: Click headers
+
+✏️ EDITING & SELECTION:
+- Cell Editing: Double-click cells to edit
+- Row Selection: Multi-select with checkboxes
+- Copy/Paste: Standard Ctrl+C/Ctrl+V support
+
+🎨 DISPLAY & STYLING:
+- Custom Renderers: Buttons, progress bars, status badges
+- Column Pinning: Lock columns to left/right
+- Themes: Professional styling with themeQuartz
+- Tooltips: Hover information on cells
+
+📄 PAGINATION & NAVIGATION:
+- Pagination: Navigate large datasets efficiently
+- Page Size Options: 10, 25, 50, 100 rows per page
+- Virtual Scrolling: Handle thousands of rows smoothly
+
+⚙️ COLUMN MANAGEMENT:
+- Resizing: Drag column borders to resize
+- Reordering: Drag column headers to reorder
+- Show/Hide: Toggle column visibility
+- Auto-sizing: Fit columns to content or container
+
+🚀 TRY THESE FEATURES:
+- Filtering: Use the search box or click filter icons in headers
+- Sorting: Click column headers, hold Ctrl for multi-sort
+- Selection: Check boxes to select rows, see count update
+- Editing: Double-click the Model column cells to edit
+- Actions: Use Edit/Delete buttons in the Actions column
+- Resizing: Drag column borders to resize columns
+- Pagination: Navigate pages at the bottom of the grid
+
+NOTE: Advanced features like row grouping, set filters, range selection,
+and aggregation require AG Grid Enterprise license.
+*/
+
 import { AgGridReact } from "ag-grid-react";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
@@ -76,7 +123,7 @@ const AgGrid = () => {
     const [quickFilterText, setQuickFilterText] = useState('');
     const [selectedRows, setSelectedRows] = useState([]);
 
-    // Column Definitions with all community features
+    // Column Definitions with only community features
     const columnDefs = useMemo(() => [
         {
             // ROW SELECTION: Checkbox column for multi-select
@@ -95,8 +142,6 @@ const AgGrid = () => {
             sortable: true,
             // FILTERING: Enable column filter
             filter: 'agTextColumnFilter',
-            // GROUPING: Enable row grouping by this column
-            enableRowGroup: true,
             // PINNING: Pin important columns
             pinned: 'left',
             width: 150,
@@ -110,7 +155,6 @@ const AgGrid = () => {
             headerName: "Model",
             sortable: true,
             filter: 'agTextColumnFilter',
-            enableRowGroup: true,
             flex: 1,
             // EDITING: Enable cell editing
             editable: true,
@@ -120,9 +164,7 @@ const AgGrid = () => {
             field: "category",
             headerName: "Category",
             sortable: true,
-            // SET FILTER: Dropdown filter for categories
-            filter: 'agSetColumnFilter',
-            enableRowGroup: true,
+            filter: 'agTextColumnFilter',
             width: 120,
             // VALUE GETTER: Computed values
             valueGetter: (params) => params.data.category,
@@ -147,9 +189,6 @@ const AgGrid = () => {
             cellClass: 'number-cell font-mono',
             headerClass: 'number-header',
             width: 140,
-            // AGGREGATION: Enable sum aggregation
-            aggFunc: 'sum',
-            enableValue: true,
             cellStyle: { textAlign: 'right', fontWeight: '600' }
         },
         {
@@ -179,8 +218,7 @@ const AgGrid = () => {
             field: "electric",
             headerName: "Power Type",
             sortable: true,
-            filter: 'agSetColumnFilter',
-            enableRowGroup: true,
+            filter: 'agTextColumnFilter',
             width: 130,
             cellRenderer: StatusCellRenderer
         },
@@ -188,7 +226,7 @@ const AgGrid = () => {
             field: "inStock",
             headerName: "In Stock",
             sortable: true,
-            filter: 'agSetColumnFilter',
+            filter: 'agTextColumnFilter',
             width: 100,
             cellRenderer: (params) => (
                 params.value
@@ -208,7 +246,7 @@ const AgGrid = () => {
         }
     ], []);
 
-    // Grid Options with all community features
+    // Grid Options with only community features
     const gridOptions = useMemo(() => ({
         // SELECTION
         rowSelection: 'multiple',
@@ -232,18 +270,7 @@ const AgGrid = () => {
         suppressColumnVirtualisation: true,
 
         // ROW FEATURES
-        enableRangeSelection: true,
         enableCellTextSelection: true,
-
-        // GROUPING & AGGREGATION
-        autoGroupColumnDef: {
-            headerName: "Group",
-            field: "make",
-            cellRenderer: 'agGroupCellRenderer',
-            cellRendererParams: {
-                checkbox: true
-            }
-        },
 
         // PERFORMANCE
         animateRows: true,
@@ -251,15 +278,6 @@ const AgGrid = () => {
         // STYLING
         headerHeight: 50,
         rowHeight: 60,
-
-        // STATUS BAR
-        statusBar: {
-            statusPanels: [
-                { statusPanel: 'agTotalAndFilteredRowCountComponent', align: 'left' },
-                { statusPanel: 'agSelectedRowCountComponent', align: 'center' },
-                { statusPanel: 'agAggregationComponent', align: 'right' }
-            ]
-        }
     }), []);
 
     // Event Handlers
@@ -282,8 +300,7 @@ const AgGrid = () => {
 
     // Utility Functions
     const exportToCSV = () => {
-        // Export functionality would need ag-grid-enterprise
-        alert('CSV Export - requires Enterprise license');
+        alert('CSV Export - requires Enterprise license for advanced export features');
     };
 
     const clearFilters = () => {
@@ -294,15 +311,7 @@ const AgGrid = () => {
     };
 
     const groupByCategory = () => {
-        if (window.gridApi) {
-            window.gridApi.setColumnVisible('category', false);
-            const columnState = window.gridApi.getColumnState();
-            const categoryCol = columnState.find(col => col.colId === 'category');
-            if (categoryCol) {
-                categoryCol.rowGroup = true;
-                window.gridApi.applyColumnState({ state: columnState });
-            }
-        }
+        alert('Row Grouping - requires Enterprise license (RowGroupingModule)');
     };
 
     return (
@@ -310,10 +319,10 @@ const AgGrid = () => {
             {/* Header Section */}
             <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
                 <h1 className="text-3xl font-bold text-gray-800 mb-2">
-                    🚗 Enhanced AG Grid - All Community Features Demo
+                    🚗 AG Grid Community Features Demo (Fixed)
                 </h1>
                 <p className="text-gray-600 mb-4">
-                    Comprehensive showcase of AG Grid Community features with detailed explanations
+                    Comprehensive showcase of AG Grid Community features - Enterprise features removed
                 </p>
 
                 {/* Control Panel */}
@@ -338,16 +347,18 @@ const AgGrid = () => {
 
                     <button
                         onClick={groupByCategory}
-                        className="px-4 py-2 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 transition-colors"
+                        className="px-4 py-2 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 transition-colors opacity-50 cursor-not-allowed"
+                        disabled
                     >
-                        Group by Category
+                        Group by Category (Enterprise)
                     </button>
 
                     <button
                         onClick={exportToCSV}
-                        className="px-4 py-2 bg-green-500 text-white rounded-md text-sm hover:bg-green-600 transition-colors"
+                        className="px-4 py-2 bg-green-500 text-white rounded-md text-sm hover:bg-green-600 transition-colors opacity-50 cursor-not-allowed"
+                        disabled
                     >
-                        Export CSV
+                        Export CSV (Enterprise)
                     </button>
 
                     <div className="text-sm text-gray-600">
@@ -383,88 +394,6 @@ const AgGrid = () => {
                             minWidth: 100
                         }}
                     />
-                </div>
-            </div>
-
-            {/* Feature Explanations */}
-            <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div className="bg-white p-6 rounded-lg shadow-sm">
-                    <h3 className="font-bold text-lg mb-3 text-blue-600">🔍 Filtering & Search</h3>
-                    <ul className="text-sm text-gray-700 space-y-2">
-                        <li><strong>Quick Filter:</strong> Search across all columns simultaneously</li>
-                        <li><strong>Column Filters:</strong> Individual filters per column (text, number, set)</li>
-                        <li><strong>Floating Filters:</strong> Filter inputs shown below headers</li>
-                        <li><strong>Advanced Filtering:</strong> AND/OR conditions, date ranges</li>
-                    </ul>
-                </div>
-
-                <div className="bg-white p-6 rounded-lg shadow-sm">
-                    <h3 className="font-bold text-lg mb-3 text-green-600">📊 Sorting & Grouping</h3>
-                    <ul className="text-sm text-gray-700 space-y-2">
-                        <li><strong>Multi-Column Sort:</strong> Hold Ctrl + click headers</li>
-                        <li><strong>Row Grouping:</strong> Drag columns to group data</li>
-                        <li><strong>Aggregation:</strong> Sum, count, average functions</li>
-                        <li><strong>Pivot Mode:</strong> Excel-like pivot table functionality</li>
-                    </ul>
-                </div>
-
-                <div className="bg-white p-6 rounded-lg shadow-sm">
-                    <h3 className="font-bold text-lg mb-3 text-purple-600">✏️ Editing & Selection</h3>
-                    <ul className="text-sm text-gray-700 space-y-2">
-                        <li><strong>Cell Editing:</strong> Double-click cells to edit</li>
-                        <li><strong>Row Selection:</strong> Multi-select with checkboxes</li>
-                        <li><strong>Range Selection:</strong> Click and drag to select ranges</li>
-                        <li><strong>Copy/Paste:</strong> Standard Ctrl+C/Ctrl+V support</li>
-                    </ul>
-                </div>
-
-                <div className="bg-white p-6 rounded-lg shadow-sm">
-                    <h3 className="font-bold text-lg mb-3 text-red-600">🎨 Display & Styling</h3>
-                    <ul className="text-sm text-gray-700 space-y-2">
-                        <li><strong>Custom Renderers:</strong> Buttons, progress bars, status badges</li>
-                        <li><strong>Column Pinning:</strong> Lock columns to left/right</li>
-                        <li><strong>Themes:</strong> Professional styling with themeQuartz</li>
-                        <li><strong>Tooltips:</strong> Hover information on cells</li>
-                    </ul>
-                </div>
-
-                <div className="bg-white p-6 rounded-lg shadow-sm">
-                    <h3 className="font-bold text-lg mb-3 text-orange-600">📄 Pagination & Navigation</h3>
-                    <ul className="text-sm text-gray-700 space-y-2">
-                        <li><strong>Pagination:</strong> Navigate large datasets efficiently</li>
-                        <li><strong>Page Size Options:</strong> 10, 25, 50, 100 rows per page</li>
-                        <li><strong>Virtual Scrolling:</strong> Handle thousands of rows smoothly</li>
-                        <li><strong>Status Bar:</strong> Row counts and selection info</li>
-                    </ul>
-                </div>
-
-                <div className="bg-white p-6 rounded-lg shadow-sm">
-                    <h3 className="font-bold text-lg mb-3 text-teal-600">⚙️ Column Management</h3>
-                    <ul className="text-sm text-gray-700 space-y-2">
-                        <li><strong>Resizing:</strong> Drag column borders to resize</li>
-                        <li><strong>Reordering:</strong> Drag column headers to reorder</li>
-                        <li><strong>Show/Hide:</strong> Toggle column visibility</li>
-                        <li><strong>Auto-sizing:</strong> Fit columns to content or container</li>
-                    </ul>
-                </div>
-            </div>
-
-            {/* Instructions */}
-            <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
-                <h3 className="font-bold text-lg mb-3 text-blue-800">🚀 Try These Features:</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-blue-700">
-                    <div>
-                        <p><strong>Filtering:</strong> Use the search box or click filter icons in headers</p>
-                        <p><strong>Sorting:</strong> Click column headers, hold Ctrl for multi-sort</p>
-                        <p><strong>Selection:</strong> Check boxes to select rows, see count update</p>
-                        <p><strong>Editing:</strong> Double-click the Model column cells to edit</p>
-                    </div>
-                    <div>
-                        <p><strong>Grouping:</strong> Click "Group by Category" button to see grouping</p>
-                        <p><strong>Actions:</strong> Use Edit/Delete buttons in the Actions column</p>
-                        <p><strong>Resizing:</strong> Drag column borders to resize columns</p>
-                        <p><strong>Pagination:</strong> Navigate pages at the bottom of the grid</p>
-                    </div>
                 </div>
             </div>
         </div>
